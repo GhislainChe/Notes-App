@@ -90,6 +90,26 @@ app.post('/api/notes', (req, res) => {
     res.status(201).json(newNote); 
 });
 
+app.put('/api/categories/:id', (req, res) => {
+    const noteId = parseInt(req.params.id)
+    const newName = req.body.name
+    if (!newName) {
+        return res.status(400).json({Error: "Did not receive any new name "})
+    }
+
+    let indexed = categories.findIndex(index => index.id == noteId)
+
+    if (indexed === -1) {
+        return res.status(404).json({ Error: 'Error; Not found'})
+    }
+
+    // if(indexed){
+    //     let index = indexed
+    // }
+
+
+})
+
 app.get('/', (req, res) => {
     res.send('Hello from the Note App API!');
 });
