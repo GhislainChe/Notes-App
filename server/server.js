@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { response } from 'express';
 import cors from 'cors'
 
 const app = express()
@@ -23,11 +23,71 @@ let nextNoteId = notes.length + 1;
 
 app.get('/api/categories', (req, res) => {
     res.json(categories); 
-
 });
 
+app.post('/api/categories', (req, res) => {
+    const name = req.body.name
+    if(!name){
+        return res.status(400).json({Error: "cant create a new category without a name"})
+    }
+    
+    const catedId = categories.length + 100
+    let newCategory = {
+        id: catedId++,
+        name: name
+    }
+
+    categories.push(newCategory)
+    res.status(201).json(newCategory)
+})
+
 app.get('/api/notes', (req, res) => {
-    res.json(notes); 
+
+    const categoryQueryId = req.query.categoryId
+    let notesToSend = notes
+
+    if(categoryQueryId){
+        const targetId = parseInt(categoryQueryId, 10)
+
+        notesToSend = notes.filter(note => note.categoryId === targetId)
+
+        // categ = 
+
+        if (isNaN(targetId)) {
+            return res.status(400).json({ error: "category id must be a number"})
+        }
+    }
+
+    res.json(notesToSend)
+});
+
+app.post('/api/notes', (req, res) => {
+
+    const { title, content, categoryId: rawCategoryId } = req.body; 
+
+    if (!title || !content || !rawCategoryId) {
+        return res.status(400).json({ error: 'Missing title, content, or categoryId.' });
+    }
+
+    const categoryId = parseInt(rawCategoryId, 10);
+
+    const categoryExists = categories.find(cat => cat.id === categoryId);
+
+    if (!categoryExists) {
+        return res.status(400).json({ error: `Category with ID ${categoryId} not found.` });
+    }
+    
+    const newNote = {
+        id: nextNoteId++, 
+        categoryId: categoryId,
+        title: title,
+        content: content,
+        timestamp: Date.now()
+    };
+    
+    notes.push(newNote); 
+    
+    res.status(201).json(newNote); 
 });
 
 app.get('/', (req, res) => {
