@@ -103,10 +103,9 @@ app.put('/api/categories/:id', (req, res) => {
         return res.status(404).json({ Error: 'Error; Not found'})
     }
 
-    // if(indexed){
-    //     let index = indexed
-    // }
+    categories[indexed].name = newName;
 
+    res.json(categories[indexed]);
 
 })
 
