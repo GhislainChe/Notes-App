@@ -109,6 +109,50 @@ app.put('/api/categories/:id', (req, res) => {
 
 })
 
+app.put('/api/notes:id', (req, res) => {
+    const noteId = parseInt(req.params.id)
+    const updateNote = req.body
+
+    if (!updateNote) {
+        return res.status(404).json({Error: 'You need to update something'})
+    }
+
+    const indexedNote = notes.findIndex(index => index.id == noteId)
+    if (indexedNote === -1) {
+        return res.status(404).json({ Error: 'Note not found'})
+    }
+
+    // --- Guide for the Crucial Validation ---
+
+// 1. Check if the user is trying to change the category
+// (We check for 'undefined' in case they send '0' or 'null')
+if (req.body.categoryId !== undefined) {
+    
+    // 2. Convert the incoming ID to a number
+    const newCategoryId = parseInt(req.body.categoryId, 10);
+
+    // 3. Check for a valid number (e.g., if they sent "abc")
+    if (isNaN(newCategoryId)) {
+        return res.status(400).json({ error: 'categoryId must be a number.' });
+    }
+
+    // 4. Search the 'categories' array to see if this ID exists
+    // 
+    const categoryExists = categories.find(cat => cat.id === newCategoryId);
+
+    // 5. If 'find' returns 'undefined', the category doesn't exist. Send an error.
+    if (!categoryExists) {
+        return res.status(400).json({ error: `Invalid categoryId: ${newCategoryId}. Category does not exist.` });
+    }
+    
+    // 6. If we get here, the new categoryId is valid!
+    // We can now safely update the note's categoryId in the next step.
+}
+// --- End of Validation Guide ---
+
+})
+
+
 app.get('/', (req, res) => {
     res.send('Hello from the Note App API!');
 });
