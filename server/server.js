@@ -150,23 +150,19 @@ app.put("/api/notes:id", (req, res) => {
       return res.status(400).json({ error: "categoryId must be a number." });
     }
 
-    // 4. Search the 'categories' array to see if this ID exists
-    //
     const categoryExists = categories.find((cat) => cat.id === newCategoryId);
 
-    // 5. If 'find' returns 'undefined', the category doesn't exist. Send an error.
     if (!categoryExists) {
-      return res
-        .status(400)
-        .json({
-          error: `Invalid categoryId: ${newCategoryId}. Category does not exist.`,
-        });
+      return res.status(400).json({
+        error: `Invalid categoryId: ${newCategoryId}. Category does not exist.`,
+      });
     }
-
-    // 6. If we get here, the new categoryId is valid!
-    // We can now safely update the note's categoryId in the next step.
   }
-  // --- End of Validation Guide ---
+
+  const categtitle = req.body.title;
+  const categNote = req.body.note;
+  notes[indexedNote].content = categNote;
+  notes[indexedNote].title = categtitle;
 });
 
 app.get("/", (req, res) => {
