@@ -179,26 +179,40 @@ app.put("/api/notes/:id", (req, res) => {
 app.delete("/api/categories/:id", (req, res) => {
   const categoryId = parseInt(req.params.id);
 
-  const indexed = categories.findIndex(
-    (category) => category.id == categoryId
-  );
+  const indexed = categories.findIndex((category) => category.id == categoryId);
 
-  if(indexed === -1){
-    return res.status(404).json({ Error: "Category not found"})
+  if (indexed === -1) {
+    return res.status(404).json({ Error: "Category not found" });
   }
 
-    const noteUsingCategory = notes.find(note => note.categoryId === categoryId);
+  const noteUsingCategory = notes.find(
+    (note) => note.categoryId === categoryId
+  );
 
-    if (noteUsingCategory) {
-        return res.status(400).json({ 
-            error: "Cannot delete category: It is still being used by notes." 
-        });
-    }
+  if (noteUsingCategory) {
+    return res.status(400).json({
+      error: "Cannot delete category: It is still being used by notes.",
+    });
+  }
 
-    categories.splice(indexed, 1);
+  categories.splice(indexed, 1);
 
-    res.status(204).send();
+  res.status(204).send();
+});
 
+app.delete("/api/notes/:id", (req, res) => {
+  const noteId = parseInt(req.params.id, 10);
+
+  const indexed = notes.findIndex((note) => note.id == noteId);
+  if (indexed === -1) {
+    return res.status(404).json({
+      error: "cant find note",
+    });
+  }
+
+  notes.splice(indexed, 1);
+
+  res.status(204).send();
 });
 
 app.get("/", (req, res) => {
