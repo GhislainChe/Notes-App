@@ -176,20 +176,28 @@ app.put("/api/notes/:id", (req, res) => {
   res.json(noteToUpdate);
 });
 
-app.delete("/api/categories/:", (req, res) => {
+app.delete("/api/categories/:id", (req, res) => {
   const categoryId = parseInt(req.params.id);
 
-  const indexedCategory = categories.findIndex(
+  const indexed = categories.findIndex(
     (category) => category.id == categoryId
   );
 
-  if(!categoryId){
+  if(indexed === -1){
     return res.status(404).json({ Error: "Category not found"})
   }
 
-  const categdelete = categories[indexedCategory]
+    const noteUsingCategory = notes.find(note => note.categoryId === categoryId);
 
-  categdelete
+    if (noteUsingCategory) {
+        return res.status(400).json({ 
+            error: "Cannot delete category: It is still being used by notes." 
+        });
+    }
+
+    categories.splice(indexed, 1);
+
+    res.status(204).send();
 
 });
 
