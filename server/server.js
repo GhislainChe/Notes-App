@@ -1,162 +1,176 @@
-import express, { response } from 'express';
-import cors from 'cors'
+import express, { response } from "express";
+import cors from "cors";
 
-const app = express()
-const PORT = 5000
+const app = express();
+const PORT = 5000;
 
-app.use(express.json())
-app.use(cors())
+app.use(express.json());
+app.use(cors());
 
 let categories = [
-    { id: 101, name: 'Work Projects' },
-    { id: 102, name: 'Personal Errands' },
-    { id: 103, name: 'Ideas & Brainstorm' }
+  { id: 101, name: "Work Projects" },
+  { id: 102, name: "Personal Errands" },
+  { id: 103, name: "Ideas & Brainstorm" },
 ];
 
 let notes = [
-    { id: 1, categoryId: 101, title: 'Prep Q4 Meeting', content: 'Review all quarterly reports...', timestamp: Date.now() },
-    { id: 2, categoryId: 102, title: 'Buy Groceries', content: 'Milk, eggs, bread, and dog food.', timestamp: Date.now() + 1 },
-    { id: 3, categoryId: 103, title: 'New App Concept', content: 'A simple expense tracker...', timestamp: Date.now() + 2 },
+  {
+    id: 1,
+    categoryId: 101,
+    title: "Prep Q4 Meeting",
+    content: "Review all quarterly reports...",
+    timestamp: Date.now(),
+  },
+  {
+    id: 2,
+    categoryId: 102,
+    title: "Buy Groceries",
+    content: "Milk, eggs, bread, and dog food.",
+    timestamp: Date.now() + 1,
+  },
+  {
+    id: 3,
+    categoryId: 103,
+    title: "New App Concept",
+    content: "A simple expense tracker...",
+    timestamp: Date.now() + 2,
+  },
 ];
 
 let nextNoteId = notes.length + 1;
 
-app.get('/api/categories', (req, res) => {
-    res.json(categories); 
+app.get("/api/categories", (req, res) => {
+  res.json(categories);
 });
 
-app.post('/api/categories', (req, res) => {
-    const name = req.body.name
-    if(!name){
-        return res.status(400).json({Error: "cant create a new category without a name"})
-    }
-    
-    const catedId = categories.length + 100
-    let newCategory = {
-        id: catedId++,
-        name: name
-    }
+app.post("/api/categories", (req, res) => {
+  const name = req.body.name;
+  if (!name) {
+    return res
+      .status(400)
+      .json({ Error: "cant create a new category without a name" });
+  }
 
-    categories.push(newCategory)
-    res.status(201).json(newCategory)
-})
+  const catedId = categories.length + 100;
+  let newCategory = {
+    id: catedId++,
+    name: name,
+  };
 
-app.get('/api/notes', (req, res) => {
-
-    const categoryQueryId = req.query.categoryId
-    let notesToSend = notes
-
-    if(categoryQueryId){
-        const targetId = parseInt(categoryQueryId, 10)
-
-        notesToSend = notes.filter(note => note.categoryId === targetId)
-
-        // categ = 
-
-        if (isNaN(targetId)) {
-            return res.status(400).json({ error: "category id must be a number"})
-        }
-    }
-
-    res.json(notesToSend)
+  categories.push(newCategory);
+  res.status(201).json(newCategory);
 });
 
-app.post('/api/notes', (req, res) => {
+app.get("/api/notes", (req, res) => {
+  const categoryQueryId = req.query.categoryId;
+  let notesToSend = notes;
 
-    const { title, content, categoryId: rawCategoryId } = req.body; 
+  if (categoryQueryId) {
+    const targetId = parseInt(categoryQueryId, 10);
 
-    if (!title || !content || !rawCategoryId) {
-        return res.status(400).json({ error: 'Missing title, content, or categoryId.' });
+    notesToSend = notes.filter((note) => note.categoryId === targetId);
+
+    // categ =
+
+    if (isNaN(targetId)) {
+      return res.status(400).json({ error: "category id must be a number" });
     }
+  }
 
-    const categoryId = parseInt(rawCategoryId, 10);
-
-    const categoryExists = categories.find(cat => cat.id === categoryId);
-
-    if (!categoryExists) {
-        return res.status(400).json({ error: `Category with ID ${categoryId} not found.` });
-    }
-    
-    const newNote = {
-        id: nextNoteId++, 
-        categoryId: categoryId,
-        title: title,
-        content: content,
-        timestamp: Date.now()
-    };
-    
-    notes.push(newNote); 
-    
-    res.status(201).json(newNote); 
+  res.json(notesToSend);
 });
 
-app.put('/api/categories/:id', (req, res) => {
-    const noteId = parseInt(req.params.id)
-    const newName = req.body.name
-    if (!newName) {
-        return res.status(400).json({Error: "Did not receive any new name "})
-    }
+app.post("/api/notes", (req, res) => {
+  const { title, content, categoryId: rawCategoryId } = req.body;
 
-    let indexed = categories.findIndex(index => index.id == noteId)
+  if (!title || !content || !rawCategoryId) {
+    return res
+      .status(400)
+      .json({ error: "Missing title, content, or categoryId." });
+  }
 
-    if (indexed === -1) {
-        return res.status(404).json({ Error: 'Error; Not found'})
-    }
+  const categoryId = parseInt(rawCategoryId, 10);
 
-    categories[indexed].name = newName;
+  const categoryExists = categories.find((cat) => cat.id === categoryId);
 
-    res.json(categories[indexed]);
+  if (!categoryExists) {
+    return res
+      .status(400)
+      .json({ error: `Category with ID ${categoryId} not found.` });
+  }
 
-})
+  const newNote = {
+    id: nextNoteId++,
+    categoryId: categoryId,
+    title: title,
+    content: content,
+    timestamp: Date.now(),
+  };
 
-app.put('/api/notes:id', (req, res) => {
-    const noteId = parseInt(req.params.id)
-    const updateNote = req.body
+  notes.push(newNote);
 
-    if (!updateNote) {
-        return res.status(404).json({Error: 'You need to update something'})
-    }
+  res.status(201).json(newNote);
+});
 
-    const indexedNote = notes.findIndex(index => index.id == noteId)
-    if (indexedNote === -1) {
-        return res.status(404).json({ Error: 'Note not found'})
-    }
+app.put("/api/categories/:id", (req, res) => {
+  const noteId = parseInt(req.params.id);
+  const newName = req.body.name;
+  if (!newName) {
+    return res.status(400).json({ Error: "Did not receive any new name " });
+  }
 
-    // --- Guide for the Crucial Validation ---
+  let indexed = categories.findIndex((index) => index.id == noteId);
 
-// 1. Check if the user is trying to change the category
-// (We check for 'undefined' in case they send '0' or 'null')
-if (req.body.categoryId !== undefined) {
-    
-    // 2. Convert the incoming ID to a number
+  if (indexed === -1) {
+    return res.status(404).json({ Error: "Error; Not found" });
+  }
+
+  categories[indexed].name = newName;
+
+  res.json(categories[indexed]);
+});
+
+app.put("/api/notes:id", (req, res) => {
+  const noteId = parseInt(req.params.id);
+  const updateNote = req.body;
+
+  if (!updateNote) {
+    return res.status(404).json({ Error: "You need to update something" });
+  }
+
+  const indexedNote = notes.findIndex((index) => index.id == noteId);
+  if (indexedNote === -1) {
+    return res.status(404).json({ Error: "Note not found" });
+  }
+
+  if (req.body.categoryId !== undefined) {
     const newCategoryId = parseInt(req.body.categoryId, 10);
 
-    // 3. Check for a valid number (e.g., if they sent "abc")
     if (isNaN(newCategoryId)) {
-        return res.status(400).json({ error: 'categoryId must be a number.' });
+      return res.status(400).json({ error: "categoryId must be a number." });
     }
 
     // 4. Search the 'categories' array to see if this ID exists
-    // 
-    const categoryExists = categories.find(cat => cat.id === newCategoryId);
+    //
+    const categoryExists = categories.find((cat) => cat.id === newCategoryId);
 
     // 5. If 'find' returns 'undefined', the category doesn't exist. Send an error.
     if (!categoryExists) {
-        return res.status(400).json({ error: `Invalid categoryId: ${newCategoryId}. Category does not exist.` });
+      return res
+        .status(400)
+        .json({
+          error: `Invalid categoryId: ${newCategoryId}. Category does not exist.`,
+        });
     }
-    
+
     // 6. If we get here, the new categoryId is valid!
     // We can now safely update the note's categoryId in the next step.
-}
-// --- End of Validation Guide ---
-
-})
-
-
-app.get('/', (req, res) => {
-    res.send('Hello from the Note App API!');
+  }
+  // --- End of Validation Guide ---
 });
 
-app.listen(PORT, () => [
-    console.log(`server running on port ${PORT}`)
-])
+app.get("/", (req, res) => {
+  res.send("Hello from the Note App API!");
+});
+
+app.listen(PORT, () => [console.log(`server running on port ${PORT}`)]);
