@@ -130,7 +130,7 @@ app.put("/api/categories/:id", (req, res) => {
   res.json(categories[indexed]);
 });
 
-app.put("/api/notes:id", (req, res) => {
+app.put("/api/notes/:id", (req, res) => {
   const noteId = parseInt(req.params.id);
   const updateNote = req.body;
 
@@ -159,10 +159,38 @@ app.put("/api/notes:id", (req, res) => {
     }
   }
 
-  const categtitle = req.body.title;
-  const categNote = req.body.note;
-  notes[indexedNote].content = categNote;
-  notes[indexedNote].title = categtitle;
+  const noteToUpdate = notes[indexedNote];
+
+  if (req.body.title !== undefined) {
+    noteToUpdate.title = req.body.title;
+  }
+  if (req.body.content !== undefined) {
+    noteToUpdate.content = req.body.content;
+  }
+  if (req.body.categoryId !== undefined) {
+    noteToUpdate.categoryId = parseInt(req.body.categoryId, 10);
+  }
+
+  noteToUpdate.timestamp = Date.now();
+
+  res.json(noteToUpdate);
+});
+
+app.delete("/api/categories/:", (req, res) => {
+  const categoryId = parseInt(req.params.id);
+
+  const indexedCategory = categories.findIndex(
+    (category) => category.id == categoryId
+  );
+
+  if(!categoryId){
+    return res.status(404).json({ Error: "Category not found"})
+  }
+
+  const categdelete = categories[indexedCategory]
+
+  categdelete
+
 });
 
 app.get("/", (req, res) => {
